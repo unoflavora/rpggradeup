@@ -4,16 +4,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 
-internal class CinematicTrigger : MonoBehaviour
+namespace RPG.Assets.Scripts.Cinematics
 {
-    private bool _isTriggered = false;
-    private void OnTriggerEnter(Collider other) 
+    class CinematicTrigger : MonoBehaviour
     {
-        if (_isTriggered) return;
-        if (!other.gameObject.CompareTag("Player")) return;
+        private bool _isTriggered = false;
+        private void OnTriggerEnter(Collider other) 
+        {
+            if (_isTriggered) return;
+            if (!other.gameObject.CompareTag("Player")) return;
 
-        _isTriggered = true;
-        GetComponent<PlayableDirector>().Play();
-    }
+            _isTriggered = true;
+            GetComponent<PlayableDirector>().Play();
+        }
 
+    } 
 }
+

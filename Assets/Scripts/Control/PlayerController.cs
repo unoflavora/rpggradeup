@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using RPG.Combat;
+﻿using RPG.Combat;
 using RPG.Core;
 using RPG.Movement;
 using UnityEngine;
@@ -51,8 +48,7 @@ namespace RPG.Control {
         {
             Ray ray = GetMouseRay();
             bool hasHit = Physics.Raycast(ray, out RaycastHit hit);
-            print(hasHit);
-
+            
             if (hasHit) 
             {
                 if(Input.GetMouseButton(0)) 
