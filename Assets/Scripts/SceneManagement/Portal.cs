@@ -1,10 +1,8 @@
 using System.Collections;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using RPG.Saving;
 using UnityEngine.AI;
 
 namespace RPG.Assets.Scripts.Core
@@ -34,12 +32,15 @@ namespace RPG.Assets.Scripts.Core
         {
             DontDestroyOnLoad(gameObject);
 
+            FindObjectOfType<SavingWrapper>().Save();
             yield return GameObject.FindObjectOfType<Fader>().FadeIn();
-            yield return SceneManager.LoadSceneAsync(sceneToLoad);
 
+            yield return SceneManager.LoadSceneAsync(sceneToLoad);
+            FindObjectOfType<SavingWrapper>().Load();
+            
             Portal otherPortal = GetOtherPortal();
             UpdatePlayer(otherPortal);
-            
+
             yield return GameObject.FindObjectOfType<Fader>().FadeOut();
 
             Destroy(gameObject);

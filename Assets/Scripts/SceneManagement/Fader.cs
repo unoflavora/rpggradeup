@@ -7,7 +7,7 @@ public class Fader : MonoBehaviour
     [SerializeField] float fadeTime;
     CanvasGroup canvasGroup;
 
-    private void Start() 
+    private void Awake() 
     {
         canvasGroup = GetComponent<CanvasGroup>();
     }

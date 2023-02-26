@@ -2,20 +2,16 @@
 
 public class PersistentObjects : MonoBehaviour
 {
-    [SerializeField] GameObject persistenObjectPrefab;
-    static bool hasSpawned = false;
-
-    private void Awake() {
-        {
-            if(hasSpawned) return;
-            SpawnPersistenObjects();
-            hasSpawned = true;
-        }
+    [SerializeField] GameObject[] persistenObjectPrefabs;
+    
+    private void Awake() 
+    {
+        SpawnPersistenObjects();
     }
 
     private void SpawnPersistenObjects()
     {
-        var persistentObject = Instantiate(persistenObjectPrefab);
-        DontDestroyOnLoad(persistentObject);
+        foreach(var persistentObject in persistenObjectPrefabs)
+            DontDestroyOnLoad(persistentObject);
     }
 }
