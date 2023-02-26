@@ -17,7 +17,6 @@ namespace RPG.Assets.Scripts.Core
         private void Start() 
         {
             thisScene = SceneManager.GetActiveScene().buildIndex;
-            Debug.Log(thisScene);
         }
 
         private void OnTriggerEnter(Collider other) 
@@ -32,14 +31,16 @@ namespace RPG.Assets.Scripts.Core
         {
             DontDestroyOnLoad(gameObject);
 
-            FindObjectOfType<SavingWrapper>().Save();
+            FindObjectOfType<SavingWrapper>().Save(); // Save current scene object state
             yield return GameObject.FindObjectOfType<Fader>().FadeIn();
 
             yield return SceneManager.LoadSceneAsync(sceneToLoad);
-            FindObjectOfType<SavingWrapper>().Load();
-            
+            FindObjectOfType<SavingWrapper>().Load(); // Load next scene object state
+
             Portal otherPortal = GetOtherPortal();
+
             UpdatePlayer(otherPortal);
+            FindObjectOfType<SavingWrapper>().Save(); // Save next scene as the last index
 
             yield return GameObject.FindObjectOfType<Fader>().FadeOut();
 

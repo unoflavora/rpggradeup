@@ -29,4 +29,9 @@ public class Fader : MonoBehaviour
             yield return null;
         }
    }
+
+   public void DisplayOverlay()
+   {
+        canvasGroup.alpha = 1;
+   }
 }

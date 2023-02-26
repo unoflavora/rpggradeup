@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using RPG.Combat;
 using RPG.Core;
+using RPG.Saving;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace RPG.Movement 
 {
-    public class Mover : MonoBehaviour, IAction
+    public class Mover : MonoBehaviour, IAction, ISaveable
     {
         [SerializeField] private Transform _target;
         private NavMeshAgent _navmeshAgent;
@@ -50,6 +52,23 @@ namespace RPG.Movement
         {
             Vector3 localVelocity = transform.InverseTransformDirection(_navmeshAgent.velocity);
             _animator.SetFloat("forwardSpeed", localVelocity.z);        
+        }
+
+        
+        public object CaptureState()
+        {
+            return new SerializedVector3(transform.position);
+        }
+
+        public void RestoreState(object data)
+        {
+            JObject state = (JObject) data;
+
+            SerializedVector3 vector = state.ToObject<SerializedVector3>();
+
+            Vector3 position = new Vector3(vector.x, vector.y, vector.z);
+
+            GetComponent<NavMeshAgent>().Warp(position);
         }
     }
 }

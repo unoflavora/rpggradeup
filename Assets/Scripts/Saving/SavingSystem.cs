@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
 using System;
 using Newtonsoft.Json.Linq;
+using UnityEngine.SceneManagement;
 
 namespace RPG.Saving
 {
      public class SavingSystem : MonoBehaviour
      {
+          public static Dictionary<string, SaveableEntity> GlobalLookup = new Dictionary<string, SaveableEntity>();
+          private const string lastSceneKey = "lastSceneBuildIndex";
+
           public void Save(string saveFile)
           {
                Dictionary<string, object> state = LoadFile(saveFile);
@@ -27,7 +32,7 @@ namespace RPG.Saving
           private void SaveFile(string saveFile, Dictionary <string, object> dataToSave)
           {
                string path = GetSavePath(saveFile);
-               
+
                if (!File.Exists(path)) CreateFile(saveFile);
 
                using (FileStream stream = File.Open(path, FileMode.Create))
@@ -44,6 +49,8 @@ namespace RPG.Saving
                {
                     state[saveable.GetUniqueIdentifier()] = saveable.CaptureState();
                }
+
+               state[lastSceneKey] = SceneManager.GetActiveScene().buildIndex;
           }
 
           private Dictionary<string, object> LoadFile(string saveFile)
@@ -89,6 +96,26 @@ namespace RPG.Saving
           {
                return Path.Combine(Application.persistentDataPath, saveFile + ".sav");
           }
-     }
+
+          public IEnumerator LoadLastScene(string saveFile)
+          {
+               Debug.Log("load last scene");
+
+               Dictionary<string, object> state = LoadFile(saveFile);
+
+               if (!state.ContainsKey(lastSceneKey)) yield break;
+
+               int sceneIndex = Convert.ToInt16(state[lastSceneKey]);
+
+               Debug.Log("SCENE INDEX " + sceneIndex);
+
+               if(sceneIndex != SceneManager.GetActiveScene().buildIndex)
+               {
+                    yield return SceneManager.LoadSceneAsync(sceneIndex);
+               }
+               
+               RestoreState(state);
+          }
+    }
 }
 

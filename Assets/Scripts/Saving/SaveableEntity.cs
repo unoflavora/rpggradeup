@@ -22,20 +22,24 @@ namespace RPG.Saving
        
         public object CaptureState()
         {
-            print("Capturing state for " + GetUniqueIdentifier());
-
-            return new SerializedVector3(transform.position);
+            Dictionary<string, object> stateOfThisObject = new Dictionary<string, object>();
+            foreach(var saveable in GetComponents<ISaveable>())
+            {
+                stateOfThisObject[saveable.GetType().ToString()] = saveable.CaptureState();
+            }
+            return stateOfThisObject;
         }
 
         public void RestoreState(JObject state)
         {
-            var actionScheduler = GetComponent<ActionScheduler>();
-            SerializedVector3 position = state.ToObject<SerializedVector3>();;
+            Dictionary<string, object> stateOfThisObject = state.ToObject<Dictionary<string, object>>();
 
-            if (actionScheduler != null)
+            foreach(var saveable in GetComponents<ISaveable>())
             {
-                GetComponent<ActionScheduler>().CancelAction();
-                GetComponent<NavMeshAgent>().Warp(new Vector3(position.x, position.y, position.z));
+                var objectType = saveable.GetType().ToString();
+
+                if(stateOfThisObject.ContainsKey(objectType))
+                    saveable.RestoreState(stateOfThisObject[objectType]);
             }
         }
 
@@ -48,11 +52,33 @@ namespace RPG.Saving
             SerializedObject serializedObject = new SerializedObject(this);
             SerializedProperty uid = serializedObject.FindProperty("uniqueIdentifier");
 
-            if(String.IsNullOrEmpty(uniqueIdentifier))
+            if (String.IsNullOrEmpty(uniqueIdentifier) || !IsUnique(uniqueIdentifier))
             {
                 uid.stringValue = System.Guid.NewGuid().ToString();
+                
                 serializedObject.ApplyModifiedProperties();
             }
+            
+            SavingSystem.GlobalLookup[uniqueIdentifier] = this;
+        }
+
+        private bool IsUnique(string uid)
+        {
+            if (!SavingSystem.GlobalLookup.ContainsKey(uniqueIdentifier)) return true;
+            if (SavingSystem.GlobalLookup[uid] == this) return true;
+            if (SavingSystem.GlobalLookup[uid] == null)
+            {
+                SavingSystem.GlobalLookup.Remove(uid);
+                return true;
+            }
+
+            if (SavingSystem.GlobalLookup[GetUniqueIdentifier()] != this)
+            {
+                SavingSystem.GlobalLookup.Remove(uid);
+                return true;
+            }
+
+            return false;
         }
         #endif
     }
