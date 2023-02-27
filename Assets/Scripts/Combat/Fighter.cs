@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using RPG.Core;
@@ -10,15 +11,27 @@ namespace RPG.Combat
 {
     public class Fighter : MonoBehaviour, IAction
     {
-        [SerializeField] private float weaponRange = 2f;
         [SerializeField] private float timeBetweenAttacks = 1f;
-        [SerializeField] private float weaponDamage = 5f;
+        [SerializeField] private Transform rightHand;
+        [SerializeField] private Transform leftHand;
+        
+        [SerializeField] private Weapon defaultWeapon;
+        [SerializeField] private Weapon currentWeapon;
+        
         private Health target;
         private float timeSinceLastAttack = Mathf.Infinity;
+        private Animator animator;
+        private void Start()
+        {
+            animator = GetComponent<Animator>();
+        }
+
 
         private void Update()
         {
             timeSinceLastAttack += Time.deltaTime;
+            
+            if (currentWeapon == null) EquipWeapon(defaultWeapon);
 
             if (target == null) return;
 
@@ -33,6 +46,7 @@ namespace RPG.Combat
                 GetComponent<Mover>().Cancel();
                 AttackBehaviour();
             }
+            
         }
 
         private void AttackBehaviour()
@@ -54,7 +68,7 @@ namespace RPG.Combat
 
         private bool GetIsInRange()
         {
-            return Vector3.Distance(transform.position, target.transform.position) < weaponRange;
+            return Vector3.Distance(transform.position, target.transform.position) < currentWeapon.GetWeaponRange();
         }
 
         public void Attack(GameObject combatTarget)
@@ -74,13 +88,28 @@ namespace RPG.Combat
         void Hit()
         {
             if (target == null) return;
-            target.TakeDamage(weaponDamage);
+            target.TakeDamage(currentWeapon.GetWeaponDamage());
+        }
+
+        void Shoot()
+        {
+            if (currentWeapon.HasProjectile())
+            {
+                currentWeapon.Shoot(target);
+            }
         }
 
         public bool CanAttack(GameObject combatTarget)
         {
             return combatTarget != null && !combatTarget.GetComponent<Health>().IsDead;
         }
+        
+        public void EquipWeapon(Weapon weapon)
+        {
+            currentWeapon = weapon;
+            currentWeapon.Spawn(rightHand, leftHand, animator);
+        }
+
 
     }
 }
