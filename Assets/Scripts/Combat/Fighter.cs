@@ -21,6 +21,7 @@ namespace RPG.Combat
         private Health target;
         private float timeSinceLastAttack = Mathf.Infinity;
         private Animator animator;
+        private GameObject _weaponObject;
         private void Start()
         {
             animator = GetComponent<Animator>();
@@ -90,11 +91,13 @@ namespace RPG.Combat
             if (target == null) return;
             target.TakeDamage(currentWeapon.GetWeaponDamage());
         }
-
+        
+        /* Animation Event */
         void Shoot()
         {
             if (currentWeapon.HasProjectile())
             {
+                if (target == null) return;
                 currentWeapon.Shoot(target);
             }
         }
@@ -106,8 +109,18 @@ namespace RPG.Combat
         
         public void EquipWeapon(Weapon weapon)
         {
+            if (_weaponObject != null)
+            {
+                Destroy(_weaponObject);
+            }
+            
             currentWeapon = weapon;
-            currentWeapon.Spawn(rightHand, leftHand, animator);
+            _weaponObject = currentWeapon.Spawn(rightHand, leftHand, animator);
+        }
+
+        public float GetWeaponRange()
+        {
+            return currentWeapon.GetWeaponRange();
         }
 
 

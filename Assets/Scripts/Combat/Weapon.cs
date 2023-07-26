@@ -13,13 +13,15 @@ namespace RPG.Combat
         [SerializeField] private bool isRightHanded;
         [SerializeField] private Projectile projectile;
 
-        private Transform weaponTransform;
+        private Transform hand;
         
-        public void Spawn (Transform rightHand, Transform leftHand, Animator animator)
+        public GameObject Spawn (Transform rightHand, Transform leftHand, Animator animator)
         {
-            weaponTransform = isRightHanded ? rightHand : leftHand;
-            if (weaponPrefab != null) Instantiate (weaponPrefab, weaponTransform);
+            hand = isRightHanded ? rightHand : leftHand;
             if (weaponAnimatorOverride != null) animator.runtimeAnimatorController = weaponAnimatorOverride;
+            if (weaponPrefab != null) return Instantiate (weaponPrefab, hand);
+            
+            return null;
         }
 
         public bool HasProjectile()
@@ -39,10 +41,13 @@ namespace RPG.Combat
 
         public void Shoot(Health target)
         {
-            var projectileTarget = Instantiate(projectile);
-            projectileTarget.transform.position = weaponTransform.position;
-            projectileTarget.SetDamage(weaponDamage);
+            if (hand == null) return;
+            
+            var projectileTarget = Instantiate(projectile, hand.position, Quaternion.identity);
+            Debug.Log(projectileTarget);
             projectileTarget.Shoot(target);
+            projectileTarget.transform.position = hand.position;
+            projectileTarget.SetDamage(weaponDamage);
         }
     }
 }

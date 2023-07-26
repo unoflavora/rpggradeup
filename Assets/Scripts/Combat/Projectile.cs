@@ -8,18 +8,21 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] private Health _target;
     [SerializeField] private float speed;
-
+    [SerializeField] private bool _homing;
+    [SerializeField] private GameObject hitEffect;
     private float _damage;
-    // Update is called once per frame
+
     void Update()
     {
         if (_target != null)
         {
-            if (Vector3.Distance(transform.position, _target.transform.position) > .5f)
+            if (_homing && !_target.IsDead)
             {
                 transform.LookAt(GetTargetPos());
-                transform.Translate(speed * Time.deltaTime * Vector3.forward);
             }
+            
+            transform.Translate(speed * Time.deltaTime * Vector3.forward);
+           
         }
     }
 
@@ -31,6 +34,7 @@ public class Projectile : MonoBehaviour
     public void Shoot (Health target)
     {
         _target = target;
+        transform.LookAt(GetTargetPos());
     }
     
     private Vector3 GetTargetPos ()
@@ -41,11 +45,13 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.name == _target.transform.name)
+        if (_target.IsDead) return;
+        
+        if (other != null && other.gameObject.name == _target.transform.name)
         {
             _target.TakeDamage(_damage);
+            if(hitEffect != null) Instantiate(hitEffect, transform.position, Quaternion.identity) ;
+            Destroy(gameObject);
         }
-        
-        Destroy(gameObject);
     }
 }
